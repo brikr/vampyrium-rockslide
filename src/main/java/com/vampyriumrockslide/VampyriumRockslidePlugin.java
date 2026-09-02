@@ -32,11 +32,25 @@ import net.runelite.client.ui.overlay.infobox.Timer;
 )
 public class VampyriumRockslidePlugin extends Plugin
 {
-	private static final Set<Integer> SHORTCUT_XPS = Set.of(27, 28, 550); // going early gives 27.5 xp, on time goes 550
-	private static final int SHORTCUT_REGION_ID = 10106;
-	private static final int SHORTCUT_WORLD_X = 2559;
-	private static final int SHORTCUT_WORLD_Y = 7818;
+	/**
+	 * xp values gained for taking the shortcut. going early gives 27.5 xp, on time goes 550
+	 */
+	private static final Set<Integer> SHORTCUT_XPS = Set.of(27, 28, 550);
+	/**
+	 * location of the shortcut
+	 */
+	private static final WorldPoint SHORTCUT_WORLD_POINT = new WorldPoint(2559, 7818, 0);
+	/**
+	 * if you gain the correct xp amount within this many tiles of the shortcut, the plugin assumes you have taken the shortcut
+	 */
+	private static int SHORTCUT_DISTANCE_THRESHOLD = 5;
+	/**
+	 * cooldown for gaining xp from the shortcut in seconds
+	 */
 	private static final int SHORTCUT_COOLDOWN_SECONDS = 450; // 7.5 minutes
+	/**
+	 * cooldown for gaining xp from the shortcut in ticks
+	 */
 	private static final int SHORTCUT_COOLDOWN_TICKS = 750;
 
 
@@ -110,10 +124,7 @@ public class VampyriumRockslidePlugin extends Plugin
 			WorldPoint pos = client.getLocalPlayer().getWorldLocation();
 
 			// check whether we completed the shortcut by inspecting xp gained and world location
-			if (SHORTCUT_XPS.contains(xpGained) &&
-				pos.getRegionID() == SHORTCUT_REGION_ID &&
-				pos.getX() == SHORTCUT_WORLD_X &&
-				pos.getY() == SHORTCUT_WORLD_Y)
+			if (SHORTCUT_XPS.contains(xpGained) && pos.distanceTo(SHORTCUT_WORLD_POINT) <= SHORTCUT_DISTANCE_THRESHOLD)
 			{
 				// start the cooldown info box
 				startShortcutCooldownTimer();
