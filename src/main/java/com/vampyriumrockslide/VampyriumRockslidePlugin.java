@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.Skill;
-import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.StatChanged;
@@ -33,17 +32,13 @@ import net.runelite.client.ui.overlay.infobox.Timer;
 public class VampyriumRockslidePlugin extends Plugin
 {
 	/**
-	 * xp values gained for taking the shortcut. going early gives 27.5 xp, on time goes 550
+	 * xp values gained for taking the shortcut. going early gives 27.5 xp, on time gives 550
 	 */
 	private static final Set<Integer> SHORTCUT_XPS = Set.of(27, 28, 550);
 	/**
-	 * location of the shortcut
+	 * chunks containing the two rockslide shortcuts (drakan rockslide is on a chunk border)
 	 */
-	private static final WorldPoint SHORTCUT_WORLD_POINT = new WorldPoint(2559, 7818, 0);
-	/**
-	 * if you gain the correct xp amount within this many tiles of the shortcut, the plugin assumes you have taken the shortcut
-	 */
-	private static int SHORTCUT_DISTANCE_THRESHOLD = 5;
+	private static final Set<Integer> SHORTCUT_REGIONS = Set.of(10106, 10361, 10362);
 	/**
 	 * cooldown for gaining xp from the shortcut in seconds
 	 */
@@ -121,10 +116,10 @@ public class VampyriumRockslidePlugin extends Plugin
 			int xpGained = statChanged.getXp() - lastAgilityXp;
 			lastAgilityXp = statChanged.getXp();
 
-			WorldPoint pos = client.getLocalPlayer().getWorldLocation();
+			int regionId = client.getLocalPlayer().getWorldLocation().getRegionID();
 
-			// check whether we completed the shortcut by inspecting xp gained and world location
-			if (SHORTCUT_XPS.contains(xpGained) && pos.distanceTo(SHORTCUT_WORLD_POINT) <= SHORTCUT_DISTANCE_THRESHOLD)
+			// check whether we completed a shortcut by inspecting xp gained and region
+			if (SHORTCUT_XPS.contains(xpGained) && SHORTCUT_REGIONS.contains(regionId))
 			{
 				// start the cooldown info box
 				startShortcutCooldownTimer();
